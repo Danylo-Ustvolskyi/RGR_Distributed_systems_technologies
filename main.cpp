@@ -1,15 +1,37 @@
-#include "mainwindow.h"
+#include "searchengine.h"
 
-#include <QApplication>
+#include <iostream>
+#include <string>
 
-// Entry point for the graphical application. It constructs a QApplication
-// instance, creates our MainWindow and runs the event loop. Without a
-// QApplication (or QCoreApplication for non‑GUI programs) most Qt
-// functionality will not work properly. The argc/argv parameters are
-// passed through so that Qt can process any command line options.
-int main(int argc, char* argv[]) {
-    QApplication app(argc, argv);
-    MainWindow win;
-    win.show();
-    return app.exec();
+// Entry point for the CLI application. It prompts the user for a directory
+// and search query, performs the search using SearchEngine, and prints
+// the results to standard output. This program does not require any
+// additional GUI libraries and can be built with a standard C++17
+// toolchain.
+int main() {
+    std::string directory;
+    std::cout << "Enter directory path: ";
+    std::getline(std::cin, directory);
+    if (directory.empty()) {
+        std::cerr << "No directory provided. Exiting.\n";
+        return 1;
+    }
+    std::string query;
+    std::cout << "Enter word or phrase to search: ";
+    std::getline(std::cin, query);
+    if (query.empty()) {
+        std::cerr << "No search query provided. Exiting.\n";
+        return 1;
+    }
+
+    auto results = SearchEngine::search(directory, query);
+    if (results.empty()) {
+        std::cout << "No matches found." << std::endl;
+    } else {
+        std::cout << "Found " << results.size() << " matches:" << std::endl;
+        for (const auto& res : results) {
+            std::cout << res.filePath << " (line " << res.lineNumber << "): " << res.lineText << std::endl;
+        }
+    }
+    return 0;
 }
